@@ -551,7 +551,7 @@
       - [使用 TiUP 联网部署（推荐）](/dm/deploy-a-dm-cluster-using-tiup.md)
       - [使用 TiUP 离线部署](/dm/deploy-a-dm-cluster-using-tiup-offline.md)
       - [使用 Binary 部署](/dm/deploy-a-dm-cluster-using-binary.md)
-      - [在 Kubernetes 环境中部署](https://docs.pingcap.com/zh/tidb-in-kubernetes/dev/deploy-tidb-dm)
+      - [在 Kubernetes 环境中部署](https://docs.pingcap.com/zh/tidb-in-kubernetes/v1.6/deploy-tidb-dm)
     - 入门指南
       - [创建数据源](/dm/quick-start-create-source.md)
       - [数据源操作](/dm/dm-manage-source.md)
@@ -1064,6 +1064,7 @@
         - [`TIDB_INDEX_USAGE`](/information-schema/information-schema-tidb-index-usage.md)
         - [`TIDB_SERVERS_INFO`](/information-schema/information-schema-tidb-servers-info.md)
         - [`TIDB_TRX`](/information-schema/information-schema-tidb-trx.md)
+        - [`TIFLASH_INDEXES`](/information-schema/information-schema-tiflash-indexes.md)
         - [`TIFLASH_REPLICA`](/information-schema/information-schema-tiflash-replica.md)
         - [`TIFLASH_SEGMENTS`](/information-schema/information-schema-tiflash-segments.md)
         - [`TIFLASH_TABLES`](/information-schema/information-schema-tiflash-tables.md)
@@ -1107,6 +1108,7 @@
   - [发布版本汇总](/releases/release-notes.md)
   - [版本发布时间线](/releases/release-timeline.md)
   - [TiDB 版本规则](/releases/versioning.md)
+  - [版本周期支持策略](https://pingkai.cn/tidb-release-support-policy)
   - [TiDB 离线包](/binary-package.md)
   - v8.5
     - [8.5.3](/releases/release-8.5.3.md)
