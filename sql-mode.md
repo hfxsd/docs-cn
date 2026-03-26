@@ -6,7 +6,7 @@ summary: TiDB 服务器采用不同 SQL 模式来操作，可以使用 `SET [SES
 
 # SQL 模式
 
-TiDB 服务器采用不同 SQL 模式来操作，且不同客户端可以应用不同模式。SQL 模式定义 TiDB 支持哪些 SQL 语法及执行哪种数据验证检查。
+tiDB 服务器采用不同 SQL 模式来操作，且不同客户端可以应用不同模式。SQL 模式定义 TiDB 支持哪些 SQL 语法及执行哪种数据验证检查。
 
 TiDB 启动之后，你可以使用 `SET [ SESSION | GLOBAL ] sql_mode='modes'` 语句设置 SQL 模式。
 

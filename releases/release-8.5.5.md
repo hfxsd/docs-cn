@@ -15,7 +15,7 @@ TiDB 版本：8.5.5
 
 ### 性能
 
-* 大幅提升特定有损 DDL 操作（例如 `BIGINT → INT`、`CHAR(120) → VARCHAR(60)`）的执行效率：在未发生数据截断的前提下，这类操作的执行耗时可从数小时缩短至分钟级、秒级甚至毫秒级，性能提升可达到数十倍至数十万倍 [#63366](https://github.com/pingcap/tidb/issues/63366) @[wjhuang2016](https://github.com/wjhuang2016), @[tangenta](https://github.com/tangenta), @[fzzf678](https://github.com/fzzf678)
+* 大幅提升特定有损 DDL 操作（例如 `BIGINT → int`、`char(120) → VARCHAR(60)`）的执行效率：在未发生数据截断的前提下，这类操作的执行耗时可从数小时缩短至分钟级、秒级甚至毫秒级，性能提升可达到数十倍至数十万倍 [#63366](https://github.com/pingcap/tidb/issues/63366) @[wjhuang2016](https://github.com/wjhuang2016), @[tangenta](https://github.com/tangenta), @[fzzf678](https://github.com/fzzf678)
 
     优化策略包括：
 
