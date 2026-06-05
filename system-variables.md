@@ -1048,14 +1048,20 @@ MPP 是 TiFlash 引擎提供的分布式计算框架，允许节点之间的数�
 
 ### `tidb_analyze_version` <span class="version-mark">从 v5.1.0 版本开始引入</span>
 
+> **警告：**
+>
+> 从 v9.0.0 起，TiDB 不再支持使用统计信息版本 1（`tidb_analyze_version = 1`）收集新的统计信息。如果你尝试将此变量设置为 `1`，TiDB 会返回错误。出于升级兼容性考虑，TiDB 仍支持读取现有的版本 1 的统计信息，但所有新的 `ANALYZE` 操作都使用统计信息版本 2（`tidb_analyze_version = 2`）。建议使用 `tidb_analyze_version = 2`。
+
 - 作用域：SESSION | GLOBAL
 - 是否持久化到集群：是
 - 是否受 Hint [SET_VAR](/optimizer-hints.md#set_varvar_namevar_value) 控制：否
 - 类型：整数型
 - 默认值：`2`
-- 范围：`[1, 2]`
 - 这个变量用于控制 TiDB 收集统计信息的行为。
-- 在 v5.3.0 及之后的版本中，该变量的默认值为 `2`，具体可参照[常规统计信息](/statistics.md)文档。如果从 v5.3.0 之前版本的集群升级至 v5.3.0 及之后的版本，`tidb_analyze_version` 的默认值不发生变化。
+    - 对于 TiDB Self-Managed，从 v5.3.0 开始，此变量的默认值已从 `1` 更改为 `2`。
+    - 对于 TiDB Cloud，从 v6.5.0 开始，此变量的默认值已从 `1` 更改为 `2`。
+    - 如果要升级的集群已经持久化 `tidb_analyze_version = 1` 配置，TiDB 会在升级期间将持久化的全局值重写为 `2`。请注意，升级后，现有的版本 1 统计信息不会自动转换为版本 2 统计信息。建议你[将使用统计信息版本 1 的现有对象迁移到版本 2](/statistics.md#切换统计信息版本)。
+- 关于此变量的详细介绍，参见[统计信息简介](/statistics.md)。
 
 ### `tidb_analyze_skip_column_types` <span class="version-mark">从 v7.2.0 版本开始引入</span>
 
@@ -1822,6 +1828,15 @@ mysql> SELECT job_info FROM mysql.analyze_jobs ORDER BY end_time DESC LIMIT 1;
 - 类型：布尔型
 - 默认值：`OFF`
 - 该变量控制是否启用废弃的 batch-dml 特性。启用该变量后，部分语句可能会被拆分为多个事务执行，这是非原子性的，使用时需谨慎。使用 batch-dml 时，必须确保正在操作的数据没有并发操作。要使该变量生效，还需要为 `tidb_batch_dml_size` 指定一个正值，并启用 `tidb_batch_insert` 和 `tidb_batch_delete` 中的至少一个。
+
+### `tidb_enable_binding_usage` <span class="version-mark">从 v9.0.0 版本开始引入</span>
+
+- 作用域: GLOBAL
+- 是否持久化到集群: 是
+- 是否受 Hint [SET_VAR](/optimizer-hints.md#set_varvar_namevar_value) 控制：否
+- 类型：布尔型
+- 默认值：`ON`
+- 该变量控制是否收集 SQL 执行计划绑定的使用统计信息。当设置为 `ON` 时，TiDB 会每六个小时将 SQL 执行计划绑定的使用统计信息写入 `mysql.bind_info` 表。
 
 ### `tidb_enable_cascades_planner`
 
@@ -3417,6 +3432,70 @@ v5.0 后，用户仍可以单独修改以上系统变量（会有废弃警告）
 - 单位：线程
 - TiFlash 中 request 执行的最大并发度。默认值为 `-1`，表示该系统变量无效，此时最大并发度取决于 TiFlash 配置项 `profiles.default.max_threads` 的设置。`0` 表示由 TiFlash 系统自动设置该值。
 
+### `tidb_mem_arbitrator_mode` <span class="version-mark">从 v9.0.0 版本开始引入</span>
+
+> **警告：**
+>
+> 该变量控制的功能为实验特性，不建议在生产环境中使用。该功能可能会在未事先通知的情况下发生变化或删除。如果发现 bug，请在 GitHub 上提 [issue](https://github.com/pingcap/tidb/issues) 反馈。
+
+- 作用域：GLOBAL
+- 是否持久化到集群：是
+- 是否受 Hint [SET_VAR](/optimizer-hints.md#set_varvar_namevar_value) 控制：否
+- 类型：枚举型
+- 默认值：`disable`
+- 可选值：`disable`、`standard`、`priority`
+- 该变量用于设置 TiDB 实例的内存管理模式，详见 [TiDB 内存控制](/configure-memory-usage.md#内存仲裁模式)。有以下取值：
+    - `disable`（默认值）：表示禁用内存仲裁模式，保持内存资源[先使用后上报](/system-variables.md#tidb_server_memory_limit-从-v640-版本开始引入)的机制。
+    - `standard`：表示启用标准内存仲裁模式。SQL 需要使用内存资源时，先向内存仲裁者进行订阅，订阅成功后再分配内存资源。如果订阅失败，SQL 终止执行。
+    - `priority`：表示启用基于优先级的内存仲裁模式。SQL 需要使用内存资源时，先向内存仲裁者进行订阅，订阅成功后再分配内存资源。TiDB 根据 SQL 的[资源组优先级](/information-schema/information-schema-resource-groups.md)处理内存资源订阅请求。
+
+### `tidb_mem_arbitrator_query_reserved` <span class="version-mark">从 v9.0.0 版本开始引入</span>
+
+> **警告：**
+>
+> 该变量控制的功能为实验特性，不建议在生产环境中使用。该功能可能会在未事先通知的情况下发生变化或删除。如果发现 bug，请在 GitHub 上提 [issue](https://github.com/pingcap/tidb/issues) 反馈。
+
+- 作用域：SESSION
+- 是否受 Hint [SET_VAR](/optimizer-hints.md#set_varvar_namevar_value) 控制：是
+- 类型：整数型
+- 默认值：`0`
+- 单位：字节
+- 范围：`[0, 9223372036854775807]`
+- 当启用[内存仲裁模式](/configure-memory-usage.md#内存仲裁模式)后，该变量控制 SQL 执行前向内存仲裁者预先订阅的内存资源份额，详见 [TiDB 内存控制](/configure-memory-usage.md#手动保障内存安全)。
+
+### `tidb_mem_arbitrator_soft_limit` <span class="version-mark">从 v9.0.0 版本开始引入</span>
+
+> **警告：**
+>
+> 该变量控制的功能为实验特性，不建议在生产环境中使用。该功能可能会在未事先通知的情况下发生变化或删除。如果发现 bug，请在 GitHub 上提 [issue](https://github.com/pingcap/tidb/issues) 反馈。
+
+- 作用域：GLOBAL
+- 是否持久化到集群：是
+- 是否受 Hint [SET_VAR](/optimizer-hints.md#set_varvar_namevar_value) 控制：否
+- 类型：字符串
+- 默认值：`0`
+- 可选值：`0`，浮点数 `(0, 1]`，整数 `(1, 9223372036854775807]`
+- 当启用[内存仲裁模式](/configure-memory-usage.md#内存仲裁模式)后，该变量控制 TiDB 实例中仲裁者可分配的内存资源份额上限，详见 [TiDB 内存控制](/configure-memory-usage.md#手动保障内存安全)。
+    - `0`：默认资源份额上限为 [`tidb_server_memory_limit`](/system-variables.md#tidb_server_memory_limit-从-v640-版本开始引入) 值的 `95%`
+    - 浮点数 `(0, 1]`：指定资源份额上限相对于 [`tidb_server_memory_limit`](/system-variables.md#tidb_server_memory_limit-从-v640-版本开始引入) 的比例。例如，`0.8` 表示资源份额上限为 `tidb_server_memory_limit * 0.8`。
+    - 整数 `(1, 9223372036854775807]`：指定字节数
+
+### `tidb_mem_arbitrator_wait_averse` <span class="version-mark">从 v9.0.0 版本开始引入</span>
+
+> **警告：**
+>
+> 该变量控制的功能为实验特性，不建议在生产环境中使用。该功能可能会在未事先通知的情况下发生变化或删除。如果发现 bug，请在 GitHub 上提 [issue](https://github.com/pingcap/tidb/issues) 反馈。
+
+- 作用域：SESSION
+- 是否受 Hint [SET_VAR](/optimizer-hints.md#set_varvar_namevar_value) 控制：否
+- 类型：枚举型
+- 默认值：`0`
+- 可选值：`0`，`1`，`nolimit`
+- 当启用[内存仲裁模式](/configure-memory-usage.md#内存仲裁模式)后，该变量用于控制 SQL 等待内存资源时的行为，详见 [TiDB 内存控制](/configure-memory-usage.md#内存仲裁模式)。
+    - `0`（默认值）：表示禁用该功能，变量不生效
+    - `1`：仅在 `priority` 模式下生效。SQL 订阅内存资源时自动绑定为高优先级；当全局内存资源不足时，SQL 会终止执行，而不是阻塞等待。
+    - `nolimit`：SQL 的内存使用不受仲裁者限制。该取值可能增加 TiDB 实例发生 OOM 的风险。
+
 ### `tidb_mem_oom_action` <span class="version-mark">从 v6.1.0 版本开始引入</span>
 
 - 作用域：GLOBAL
@@ -4436,7 +4515,7 @@ SHOW WARNINGS;
 - 默认值：`24.0`
 - 表示 TiFlash 计算的并发数。该变量是[代价模型](/cost-model.md)内部使用的变量，**不建议**修改该变量的值。
 
-## `tidb_opt_use_invisible_indexes` <span class="version-mark">从 v8.0.0 版本开始引入</span>
+### `tidb_opt_use_invisible_indexes` <span class="version-mark">从 v8.0.0 版本开始引入</span>
 
 - 作用域：SESSION
 - 是否受 Hint [SET_VAR](/optimizer-hints.md#set_varvar_namevar_value) 控制：是
