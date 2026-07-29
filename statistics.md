@@ -22,7 +22,7 @@ TiDB 根据表的变更次数自动调度 [`ANALYZE`](/sql-statements/sql-statem
 
 |  系统变量名 | 默认值 | 功能描述 |
 | --------- | ----- | --------- |
-| [`tidb_auto_analyze_concurrency`](/system-variables.md#tidb_auto_analyze_concurrency-从-v840-版本开始引入) | `1` | TiDB 集群中自动更新统计信息操作的并发度 |
+| [`tidb_auto_analyze_concurrency`](/system-variables.md#tidb_auto_analyze_concurrency-从-v840-版本开始引入) | `3` | TiDB 集群中自动更新统计信息操作的并发度 |
 | [`tidb_auto_analyze_end_time`](/system-variables.md#tidb_auto_analyze_end_time) | `23:59 +0000` | 一天中允许统计信息自动更新的结束时间 |
 | [`tidb_auto_analyze_partition_batch_size`](/system-variables.md#tidb_auto_analyze_partition_batch_size-从-v640-版本开始引入)   | `8192` | TiDB 自动 ANALYZE 分区表（即自动更新分区表的统计信息）时，每次同时 ANALYZE 分区的个数 |
 | [`tidb_auto_analyze_ratio`](/system-variables.md#tidb_auto_analyze_ratio) | `0.5` | 自动更新阈值 |
@@ -97,6 +97,10 @@ Count-Min Sketch 是一种哈希结构，当处理等值查询（如 `a = 1`）�
 Top-N 值是列或索引中出现次数前 N 的值。Top-N 统计信息通常被称为频率统计信息或数据倾斜。
 
 TiDB 会记录 Top-N 的值和出现次数。参数 `WITH NUM TOPN` 控制 Top-N 值的数量，默认值是 `20`，表示收集出现频率最高的前 20 个值；最大值是 `1024`。关于该参数的详细信息，参见[手动收集](#手动收集)小节。
+
+> **注意：**
+>
+> 从 v9.0.0 开始，当 [`tidb_analyze_version = 2`](/system-variables.md#tidb_analyze_version-从-v510-版本开始引入) 时，TiDB 不会为单列唯一索引及其对应的列收集 Top-N 统计信息，因为每个值最多只会出现一次。
 
 ## 选择性收集统计信息
 
@@ -687,23 +691,29 @@ mysql> SHOW WARNINGS;
 
 #### `tidb_build_stats_concurrency`
 
-`ANALYZE` 任务在执行时会被切分成一个个小任务，每个任务只负责某一个列或者索引的统计信息收集。你可以使用 [`tidb_build_stats_concurrency`](/system-variables.md#tidb_build_stats_concurrency) 控制可以同时执行的小任务的数量，其默认值是 `2`。TiDB v7.4.0 及其之前版本中，默认值为 `4`。
+该变量控制手动收集统计信息时，构建统计信息的并发度，例如可以同时处理的表或分区的分析任务的数量。其默认值为 `2`。在 TiDB v7.4.0 及之前的版本中，其默认值为 `4`。
 
 #### `tidb_build_sampling_stats_concurrency`
 
-在执行 `ANALYZE` 普通列任务的时候，你可以使用 [`tidb_build_sampling_stats_concurrency`](/system-variables.md#tidb_build_sampling_stats_concurrency-从-v750-版本开始引入) 控制执行采样任务的并发数量，其默认值是 `2`。
+该变量控制 `ANALYZE` 在以下方面的并发情况：
+
+- 合并从不同 Region 收集的样本时的并发度。
+- 针对特殊索引（例如基于虚拟生成列的索引）收集统计信息的并发度，例如 TiDB 可同时为多少个特殊索引收集统计信息。
+
+其默认值为 `2`。
 
 #### `tidb_analyze_partition_concurrency`
 
-在执行 `ANALYZE` 任务的时候，你可以使用 [`tidb_analyze_partition_concurrency`](/system-variables.md#tidb_analyze_partition_concurrency) 控制对分区表统计信息进行读写的并发度，其默认值是 `2`。TiDB v7.4.0 及其之前版本中，默认值为 `1`。
+该变量控制保存 `ANALYZE` 结果（将 TopN 和直方图写入系统表）的并发度。其默认值为 `2`。在 TiDB v7.4.0 及之前的版本中，其默认值为 `1`。
 
-#### `tidb_distsql_scan_concurrency`
+#### `tidb_analyze_distsql_scan_concurrency`
 
-在执行 `ANALYZE` 普通列任务的时候，你可以使用 [`tidb_distsql_scan_concurrency`](/system-variables.md#tidb_distsql_scan_concurrency) 控制一次读取的 Region 数量，其默认值是 `15`。修改该变量的值会影响查询性能，请谨慎调整。
+该变量控制 `ANALYZE` 在以下方面的并发情况：
 
-#### `tidb_index_serial_scan_concurrency`
+- 扫描 TiKV Region 的并发度。
+- 为特殊索引（基于虚拟生成列的索引）扫描 Region 的并发度。
 
-在执行 `ANALYZE` 索引列任务的时候，你可以使用 [`tidb_index_serial_scan_concurrency`](/system-variables.md#tidb_index_serial_scan_concurrency) 控制一次读取的 Region 数量，其默认值是 `1`。修改该变量的值会影响查询性能，请谨慎调整。
+其默认值为 `4`。
 
 ## 另请参阅
 
