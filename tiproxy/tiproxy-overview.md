@@ -5,7 +5,7 @@ summary: 介绍 TiProxy 的主要功能、安装与使用方法。
 
 # TiProxy 简介
 
-TiProxy 是 PingCAP 的官方代理组件，它放置在客户端和 TiDB server 之间，为 TiDB 提供负载均衡、连接保持、服务发现等功能。
+TiProxy 是 {{{ .company }}} 的官方代理组件，它放置在客户端和 TiDB server 之间，为 TiDB 提供负载均衡、连接保持、服务发现等功能。
 
 TiProxy 是可选组件，你也可以使用第三方的代理组件，或者直接连接到 TiDB server。
 
@@ -141,7 +141,7 @@ TiProxy 不适用于以下场景：
 
     ```yaml
     component_versions:
-      tiproxy: "v1.3.2"
+      tiproxy: "v1.3.3"
     server_configs:
       tiproxy:
         ha.virtual-ip: "10.0.1.10/24"
@@ -173,7 +173,7 @@ TiProxy 不适用于以下场景：
 
     ```yaml
     component_versions:
-      tiproxy: "v1.3.2"
+      tiproxy: "v1.3.3"
     server_configs:
       tiproxy:
         ha.virtual-ip: "10.0.1.10/24"

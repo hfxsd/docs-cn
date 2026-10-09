@@ -109,14 +109,7 @@ TiCDC 新架构除以下特殊说明外，其余部分与老架构完全兼容�
 
 ## 使用限制
 
-目前，TiCDC 新架构已完整实现旧架构的全部功能，但其中部分功能尚未经过全面的测试验证。为确保系统稳定性，暂不建议在核心生产环境中使用以下功能：
-
-- [Syncpoint](/ticdc/ticdc-upstream-downstream-check.md)
-- [Redo Log](/ticdc/ticdc-sink-to-mysql.md#灾难场景的最终一致性复制)
-- [Pulsar Sink](/ticdc/ticdc-sink-to-pulsar.md)
-- [Storage Sink](/ticdc/ticdc-sink-to-cloud-storage.md)
-
-此外，TiCDC 新架构目前暂不支持将大事务拆分为多个批次同步至下游，因此在处理超大事务时仍存在 OOM 风险，请在使用前评估相关影响。
+TiCDC 新架构目前暂不支持将大事务拆分为多个批次同步至下游，因此在处理超大事务时仍存在 OOM 风险，请在使用前评估相关影响。
 
 ## 升级指南
 
@@ -152,7 +145,7 @@ cdc_servers:
 spec:
   ticdc:
     baseImage: pingcap/ticdc
-    version: v8.5.4
+    version: v{{{ .ticdc-version }}}
     replicas: 3
     config:
       newarch = true
@@ -176,10 +169,10 @@ spec:
 
     离线包下载链接格式为 `https://tiup-mirrors.pingcap.com/cdc-${version}-${os}-${arch}.tar.gz`。其中，`${version}` 为 TiCDC 版本号（版本号信息可参考 [TiCDC 新架构版本发布列表](https://github.com/pingcap/ticdc/releases)），`${os}` 为你的操作系统，`${arch}` 为组件运行的平台（`amd64` 或 `arm64`）。
 
-    例如，可以使用以下命令下载 Linux 系统 x86-64 架构的 TiCDC v8.5.4-release.1 的离线包：
+    例如，可以使用以下命令下载 Linux 系统 x86-64 架构的 TiCDC v{{{ .ticdc-version }}} 离线包：
 
     ```shell
-    wget https://tiup-mirrors.pingcap.com/cdc-v8.5.4-release.1-linux-amd64.tar.gz
+    wget https://tiup-mirrors.pingcap.com/cdc-v{{{ .ticdc-version }}}-linux-amd64.tar.gz
     ```
 
 3. 如果集群中已经有 Changefeed，请参考[停止同步任务](/ticdc/ticdc-manage-changefeed.md#停止同步任务)暂停所有的 Changefeed 同步任务。例如：
@@ -192,7 +185,7 @@ spec:
 4. 使用 [`tiup cluster patch`](/tiup/tiup-component-cluster-patch.md) 命令将下载的 TiCDC 二进制文件动态替换到你的 TiDB 集群中：
 
     ```shell
-    tiup cluster patch <cluster-name> ./cdc-v8.5.4-release.1-linux-amd64.tar.gz -R cdc --overwrite
+    tiup cluster patch <cluster-name> ./cdc-v{{{ .ticdc-version }}}-linux-amd64.tar.gz -R cdc --overwrite
     ```
 
 5. 通过 [`tiup cluster edit-config`](/tiup/tiup-component-cluster-edit-config.md) 命令更新 TiCDC 配置以启用 TiCDC 新架构：
@@ -227,7 +220,7 @@ spec:
     spec:
       ticdc:
         baseImage: pingcap/ticdc
-        version: v8.5.4-release.1
+        version: v{{{ .ticdc-version }}}
         replicas: 3
         config:
           newarch = true
@@ -256,7 +249,7 @@ spec:
         spec:
           ticdc:
             baseImage: pingcap/ticdc
-            version: v8.5.4-release.1
+            version: v{{{ .ticdc-version }}}
             replicas: 3
         ```
 

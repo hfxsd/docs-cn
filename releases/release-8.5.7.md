@@ -9,7 +9,7 @@ summary: 了解 TiDB 8.5.7 版本的新功能、兼容性变更、改进提升�
 
 TiDB 版本：8.5.7
 
-试用链接：[快速体验](https://docs.pingcap.com/zh/tidb/v8.5/quick-start-with-tidb) | [生产部署](https://docs.pingcap.com/zh/tidb/v8.5/production-deployment-using-tiup) | [下载离线包](https://pingkai.cn/download#tidb-community)
+试用链接：[快速体验](https://docs.pingcap.com/zh/tidb/v8.5/quick-start-with-tidb) | [生产部署](https://docs.pingcap.com/zh/tidb/v8.5/production-deployment-using-tiup)
 
 ## 新功能
 
@@ -113,6 +113,8 @@ TiDB 版本：8.5.7
 | 配置文件或组件 | 配置项 | 修改类型 | 描述 |
 | -------- | -------- | -------- | -------- |
 | TiDB | [`enable-telemetry`](https://docs.pingcap.com/zh/tidb/v8.5/tidb-configuration-file#enable-telemetry-从-v402-版本开始引入) | 废弃 | 从 v8.5.7 开始，TiDB 废弃该配置项及 telemetry 功能。该配置项仅为兼容性而保留，不再推荐使用。|
+| TiKV | [`raftdb.compaction-readahead-size`](https://docs.pingcap.com/zh/tidb/v8.5/tikv-configuration-file#compaction-readahead-size-1) | 修改 | 默认值从 `0`（禁用预读）修改为 `2MiB`，以提升 compaction 的读取性能。|
+| TiKV | [`rocksdb.compaction-readahead-size`](https://docs.pingcap.com/zh/tidb/v8.5/tikv-configuration-file#compaction-readahead-size) | 修改 | 默认值从 `0`（禁用预读）修改为 `2MiB`，以提升 compaction 的读取性能。|
 | TiKV | [`backup.gcp-v2-enable`](https://docs.pingcap.com/zh/tidb/v8.5/tikv-configuration-file#backupgcp-v2-enable-从-v857-版本开始引入) | 新增 | 用于控制 TiKV 在 GCS 全量备份与恢复中是否使用 `gcp_v2` 外部存储后端。默认值为 `true`。启用时，TiKV 使用 `gcp_v2`；关闭时，TiKV 使用旧版 GCS 实现。|
 | TiKV | [`log-backup.gcp-v2-enable`](https://docs.pingcap.com/zh/tidb/v8.5/tikv-configuration-file#log-backupgcp-v2-enable-从-v857-版本开始引入) | 新增 | 用于控制 TiKV 在 GCS 日志备份中是否使用 `gcp_v2` 外部存储后端。默认值为 `true`。启用时，TiKV 使用 `gcp_v2`；关闭时，TiKV 使用旧版 GCS 实现。|
 | TiKV | [`resource-control.admission-max-delayed-count`](https://docs.pingcap.com/zh/tidb/v8.5/tikv-configuration-file#admission-max-delayed-count-从-v857-版本开始引入) | 新增 | 用于指定 TiKV 在准入控制延迟队列中可保留的最大并发请求数（读写合计）。默认值为 `10000`。将该值设置为 `0` 表示并发延迟数不受限制。|
@@ -174,7 +176,7 @@ TiDB 版本：8.5.7
     - 支持在 `LEADING` optimizer hint 中使用嵌套括号来指定更复杂的连接顺序，例如 `LEADING((a, b), (c, d))` [#63253](https://github.com/pingcap/tidb/issues/63253) @[guo-shaoge](https://github.com/guo-shaoge)
     - 改进 Join 执行计划选择，避免在估算 probe 行数接近全表扫描时选择低效的 index join，从而提升某些 `HASHAGG` + join 场景下的查询性能 [#67610](https://github.com/pingcap/tidb/issues/67610) @[qw4990](https://github.com/qw4990)
     - 提升嵌套 `OR` 条件查询的性能，通过启用更高效的 `IndexMerge` 计划，并允许移除冗余全局过滤条件以便下推 `LIMIT` [#65822](https://github.com/pingcap/tidb/issues/65822) @[time-and-fate](https://github.com/time-and-fate)
-    - 支持 `FLUSH STATS_DELTA` 语句，用于持久化全部、数据库级或表级范围内待写入的优化器统计信息增量 [#65668](https://github.com/pingcap/tidb/issues/65668) @[0xPoe](https://github.com/0xPoe)
+    - 支持 [`FLUSH STATS_DELTA`](https://docs.pingcap.com/zh/tidb/v8.5/sql-statement-flush-stats-delta) 语句，用于持久化集群级、数据库级或表级范围内待写入的优化器统计信息 delta [#65668](https://github.com/pingcap/tidb/issues/65668) @[0xPoe](https://github.com/0xPoe)
     - 改进查询优化，默认启用用于在存在备选索引时考虑 `IndexMerge` 的优化器修复控制项，使 TiDB 能在更多适用查询中选择 `IndexMerge` 计划 [#26764](https://github.com/pingcap/tidb/issues/26764) @[time-and-fate](https://github.com/time-and-fate)
     - 支持缓存使用 `set_var` 和 `resource_group` Hint 的预处理与非预处理查询，以提升带 Hint 查询的 plan cache 命中率 [#60920](https://github.com/pingcap/tidb/issues/60920) @[qw4990](https://github.com/qw4990)
     - 优化使用 `IndexMerge` 的 `ORDER BY ... LIMIT` 和 `ORDER BY ... TOPN` 查询，在可能的情况下将 `Limit` 或 `TopN` 下推到各个 partial path，从而减少某些查询计划中不必要的扫描和排序 [#68773](https://github.com/pingcap/tidb/issues/68773) @[time-and-fate](https://github.com/time-and-fate)

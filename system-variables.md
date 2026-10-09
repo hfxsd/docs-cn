@@ -1809,6 +1809,10 @@ mysql> SELECT job_info FROM mysql.analyze_jobs ORDER BY end_time DESC LIMIT 1;
 
 ### `tidb_enable_auto_analyze_priority_queue` <span class="version-mark">从 v8.0.0 版本开始引入</span>
 
+> **警告：**
+>
+> 从 v9.0.0 版本开始，该变量被废弃。TiDB 始终开启优先队列来调度自动收集统计信息的任务。
+
 - 作用域：GLOBAL
 - 是否持久化到集群：是
 - 是否受 Hint [SET_VAR](/optimizer-hints.md#set_varvar_namevar_value) 控制：否
@@ -2591,9 +2595,9 @@ Query OK, 0 rows affected (0.09 sec)
 
 > **警告：**
 >
-> - 在 v8.1.0 之前的版本中，TiDB 会定期向 PingCAP 上报遥测信息。
+> - 在 v8.1.0 之前的版本中，TiDB 会定期向 {{{ .company }}} 上报遥测信息。
 > - 在 v8.1.0 到 v8.5.2 及其之间的版本中，TiDB 已移除遥测功能，`tidb_enable_telemetry` 变量不再生效。保留该变量仅用于与之前版本兼容。
-> - 在 v8.5.3 到 v8.5.6 及其之间的版本中，TiDB 重新引入遥测功能，但其行为已更改为仅将遥测相关信息输出到日志文件，不再通过网络发送给 PingCAP。
+> - 在 v8.5.3 到 v8.5.6 及其之间的版本中，TiDB 重新引入遥测功能，但其行为已更改为仅将遥测相关信息输出到日志文件，不再通过网络发送给 {{{ .company }}}。
 > - 从 v8.5.7 开始，TiDB 废弃了该系统变量和遥测功能。
 
 - 作用域：GLOBAL
@@ -3002,7 +3006,7 @@ v5.0 后，用户仍可以单独修改以上系统变量（会有废弃警告）
 - 类型：布尔型
 - 默认值：`ON`
 - 此变量控制异步提交 (Async Commit) 中提交时间戳的计算方式。默认情况下（使用 `ON` 值），两阶段提交从 PD 服务器请求一个新的时间戳，并使用该时间戳计算最终提交的时间戳，这样可保证所有并发事务可线性化。
-- 如果将该变量值设为 `OFF`，从 PD 获取时间戳的操作会被省掉，这种情况下只保证因果一致性但不保证线性一致性。详情请参考 PingCAP 博文 [Async Commit 原理介绍](https://pingkai.cn/tidbcommunity/blog/0914a19a)。
+- 如果将该变量值设为 `OFF`，从 PD 获取时间戳的操作会被省掉，这种情况下只保证因果一致性但不保证线性一致性。详情请参考博客 [Async Commit 原理介绍](https://pingkai.cn/tidbcommunity/blog/0914a19a)。
 - 对于需要只保证因果一致性的场景，可将此变量设为 `OFF` 以提升性能。
 
 ### `tidb_hash_exchange_with_new_collation`
@@ -5267,7 +5271,7 @@ EXPLAIN FORMAT='brief' SELECT COUNT(1) FROM t WHERE a = 1 AND b IS NOT NULL;
 - 默认值：`80%`
 - 取值范围：
     - 你可以将该变量值设为百分比格式，表示内存用量占总内存的百分比，取值范围为 `[1%, 99%]`。
-    - 你还可以将变量值设为内存大小，取值范围为 `0` 以及 `[536870912, 9223372036854775807]`，单位为 Byte。支持带单位的内存格式 "KiB|MiB|GiB|TiB"。`0` 值表示不设内存限制。
+    - 你还可以将变量值设为内存大小，取值范围为 `0` 以及 `[536870912, 9223372036854775807]`，单位为 Byte。支持带单位的内存格式 "KiB|MiB|GiB|TiB" 或 "KB|MB|GB|TB"，例如 `90GiB`（数字和单位之间无空格）。`0` 值表示不设内存限制。
     - 当设置的内存值小于 512 MiB 且不为 0 时，TiDB 将会使用 512 MiB 作为替代。
 - 该变量指定 TiDB 实例的内存限制。TiDB 会在内存用量达到该限制时，对当前内存用量最高的 SQL 语句进行取消 (Cancel) 操作。在该 SQL 语句被成功 Cancel 掉后，TiDB 会尝试调用 Golang GC 立刻回收内存，以最快速度缓解内存压力。
 - 只有内存使用大于 `tidb_server_memory_limit_sess_min_size` 的 SQL 语句会被选定为最优先被 Cancel 的 SQL 语句。
@@ -5288,7 +5292,7 @@ EXPLAIN FORMAT='brief' SELECT COUNT(1) FROM t WHERE a = 1 AND b IS NOT NULL;
 - 是否持久化到集群：是
 - 是否受 Hint [SET_VAR](/optimizer-hints.md#set_varvar_namevar_value) 控制：否
 - 默认值：`134217728`（即 128 MiB）
-- 取值范围：`[128, 9223372036854775807]`，单位为 Byte。支持带单位的内存格式 "KiB|MiB|GiB|TiB"。
+- 取值范围：`[128, 9223372036854775807]`，单位为 Byte。支持带单位的内存格式 "KiB|MiB|GiB|TiB" 或 "KB|MB|GB|TB"，例如 `130MiB`（数字和单位之间无空格）。
 - 开启内存限制后，TiDB 会终止当前实例上内存用量最高的 SQL 语句。本变量指定此情况下 SQL 语句被终止的最小内存用量。如果 TiDB 实例的内存超限是由许多内存使用量不明显的会话导致的，可以适当调小该变量值，使得更多会话成为 Cancel 的对象。
 
 ### `tidb_service_scope` <span class="version-mark">从 v7.4.0 版本开始引入</span>

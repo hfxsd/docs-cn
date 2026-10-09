@@ -451,7 +451,7 @@
         - [悲观模式](/dm/feature-shard-merge-pessimistic.md)
         - [乐观模式](/dm/feature-shard-merge-optimistic.md)
         - [手动处理 Sharding DDL Lock](/dm/manually-handling-sharding-ddl-locks.md)
-      - [迁移使用 GH-ost/PT-osc 的数据源](/dm/feature-online-ddl.md)
+      - [迁移使用 gh-ost/pt-osc 的数据源](/dm/feature-online-ddl.md)
       - [上下游列数量不一致的迁移](/migrate-with-more-columns-downstream.md)
       - [增量数据校验](/dm/dm-continuous-data-validation.md)
     - 运维管理
@@ -727,6 +727,7 @@
       - [`FLASHBACK DATABASE`](/sql-statements/sql-statement-flashback-database.md)
       - [`FLASHBACK TABLE`](/sql-statements/sql-statement-flashback-table.md)
       - [`FLUSH PRIVILEGES`](/sql-statements/sql-statement-flush-privileges.md)
+      - [`FLUSH STATS_DELTA`](/sql-statements/sql-statement-flush-stats-delta.md)
       - [`FLUSH STATUS`](/sql-statements/sql-statement-flush-status.md)
       - [`FLUSH TABLES`](/sql-statements/sql-statement-flush-tables.md)
       - [`GRANT <privileges>`](/sql-statements/sql-statement-grant-privileges.md)
@@ -825,7 +826,7 @@
       - [日期和时间类型](/data-type-date-and-time.md)
       - [字符串类型](/data-type-string.md)
       - [JSON 类型](/data-type-json.md)
-      - [向量数据类型](/ai/reference/vector-search-data-types.md)
+      - [向量数据类型](https://docs.pingcap.com/zh/ai/vector-search-data-types/)
     - 函数与操作符
       - [函数与操作符概述](/functions-and-operators/functions-and-operators-overview.md)
       - [表达式求值的类型转换](/functions-and-operators/type-conversion-in-expression-evaluation.md)
@@ -839,7 +840,7 @@
       - [加密和压缩函数](/functions-and-operators/encryption-and-compression-functions.md)
       - [锁函数](/functions-and-operators/locking-functions.md)
       - [信息函数](/functions-and-operators/information-functions.md)
-      - [向量函数和操作符](/ai/reference/vector-search-functions-and-operators.md)
+      - [向量函数和运算符](https://docs.pingcap.com/zh/ai/vector-search-functions-and-operators/)
       - JSON 函数
         - [概览](/functions-and-operators/json-functions.md)
         - [创建 JSON 的函数](/functions-and-operators/json-functions/json-functions-create.md)
@@ -862,7 +863,7 @@
       - [Oracle 与 TiDB 函数和语法差异对照](/oracle-functions-to-tidb.md)
     - [聚簇索引](/clustered-indexes.md)
     - [全局索引](/global-indexes.md)
-    - [向量索引](/ai/reference/vector-search-index.md)
+    - [向量索引](https://docs.pingcap.com/zh/ai/vector-search-index/)
     - [约束](/constraints.md)
     - [生成列](/generated-columns.md)
     - [SQL 模式](/sql-mode.md)
